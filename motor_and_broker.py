@@ -36,13 +36,13 @@ ads = ADS.ADS1115(i2c)
 channel = AnalogIn(ads, ADS.P0)
 
 # Motor pins (using GPIO.BCM)
-MotorA1 = 22  # Entrada
-MotorA2 = 27  # Entrada
-MotorA3 = 17  # Habilitar
+MotorA1 = 22  # In
+MotorA2 = 27  # In
+MotorA3 = 17  # En
 
-MotorB1 = 21   # Entrada
-MotorB2 = 20   # Entrada
-MotorB3 = 16  # Habilitar
+MotorB1 = 21   # In
+MotorB2 = 20   # In
+MotorB3 = 16  # En
 
 # Motor setup
 GPIO.setup(MotorA1, GPIO.OUT)
@@ -57,8 +57,8 @@ MQTT_BROKER = "broker.hivemq.com"
 MQTT_PORT = 1883
 MQTT_TOPICS = ["sensors/accelerometer", "sensors/ads1115", "sensors/bmp280", "sensors/ultrasonic", "sensors/direction"]
 
+# Function to stop motors
 def stop():
-    """Stop both motors."""
     print("stop")
     GPIO.output(MotorA1, GPIO.LOW)
     GPIO.output(MotorA2, GPIO.LOW)
@@ -67,8 +67,8 @@ def stop():
     GPIO.output(MotorA3, GPIO.LOW)
     GPIO.output(MotorB3, GPIO.LOW)
 
+# Function to control car via MQTT
 def on_message(client, userdata, msg):
-    """Car control based on MQTT message."""
     try:
         direction = msg.payload.decode()
     except UnicodeDecodeError:
@@ -83,6 +83,8 @@ def on_message(client, userdata, msg):
         GPIO.output(MotorB1, GPIO.LOW)
         GPIO.output(MotorB2, GPIO.HIGH)
         GPIO.output(MotorB3, GPIO.HIGH)
+        time.sleep(2)
+        stop()
     elif direction == "s":
         print("backward")
         GPIO.output(MotorA1, GPIO.HIGH)
@@ -91,27 +93,26 @@ def on_message(client, userdata, msg):
         GPIO.output(MotorB1, GPIO.HIGH)
         GPIO.output(MotorB2, GPIO.LOW)
         GPIO.output(MotorB3, GPIO.HIGH)
-
+        time.sleep(2)
+        stop()
     elif direction == "d":
         print("right")
         GPIO.output(MotorA1, GPIO.LOW)
         GPIO.output(MotorA2, GPIO.HIGH)
         GPIO.output(MotorA3, GPIO.HIGH)
         GPIO.output(MotorB3, GPIO.LOW)
-
+        time.sleep(1)
+        stop()
     elif direction == "a":
         print("left")
         GPIO.output(MotorB1, GPIO.LOW)
         GPIO.output(MotorB2, GPIO.HIGH)
         GPIO.output(MotorB3, GPIO.HIGH)
         GPIO.output(MotorA3, GPIO.LOW)
-
+        time.sleep(1)
+        stop()
     else:
         print("Invalid command")
-    
-    time.sleep(2)
-    stop()
-
 # Function to measure distance with the ultrasonic sensor
 def measure_distance():
     GPIO.output(TRIG, False)
