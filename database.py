@@ -1,42 +1,55 @@
-from sqlalchemy import create_engine, Column, Integer, Date, Float, BOOLEAN
+from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm import declarative_base
+from datetime import datetime
 
-#DATABASEURL = "mysql+pymysql://root:M1n3cr9f7_LJ@localhost/raspberry_1"
-DATABASEURL = "mysql+pymysql://weccat:tacoverde@10.48.233.73/raspberry_2"
-#               mysql+pymysql://root:Password@ip/name_database
-
-engine = create_engine(DATABASEURL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind= engine)
+# Conexión a la base de datos MySQL
+DATABASE_URL = "mysql+pymysql://root:Lalito24571$@localhost/proyecto_xrover"
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-
-class Ultrasonico(Base):
-    __tablename__ = "ultrasonico"
-    id = Column(Integer, primary_key=True, index=True)
-    fecha = Column(Date, index=True)
-    valor_distancia_cm = Column(Float)
-
-class Adc(Base):
-    __tablename__ = "adc"
-    id = Column(Integer, primary_key=True, index=True)
-    fecha = Column(Date, index=True)
-    valor_res_luz = Column(Float)
-    voltage = Column(Float)
-
+# Modelo para la tabla del acelerómetro
 class Acelerometro(Base):
-    __tablename__ = "acelerometro"
+    __tablename__ = "accelerometer"
     id = Column(Integer, primary_key=True, index=True)
-    fecha = Column(Date, index=True)
-    valor_acel_x = Column(Float)
-    valor_acel_y = Column(Float)
-    valor_acel_z = Column(Float)
+    x = Column(Float)
+    y = Column(Float)
+    z = Column(Float)
+    freefall_event = Column(String(10))
+    motion_event = Column(String(10))
+    fecha = Column(DateTime, default=datetime.utcnow)
 
-
-class Presion(Base):
-    __tablename__ = "presion"
+# Modelo para la tabla BMP280 (temperatura, presión y altitud)
+class BMP280(Base):
+    __tablename__ = "bmp280"
     id = Column(Integer, primary_key=True, index=True)
-    fecha = Column(Date, index=True)
-    valor_temperatura = Column(Float)
-    valor_presion = Column(Float)
-    valor_altitud = Column(Float)
+    temperature = Column(Float)
+    pressure = Column(Float)
+    altitude = Column(Float)
+    fecha = Column(DateTime, default=datetime.utcnow)
+
+# Modelo para la tabla del sensor ultrasónico
+class Ultrasonico(Base):
+    __tablename__ = "ultrasonic"
+    id = Column(Integer, primary_key=True, index=True)
+    distance_cm = Column(Float)
+    fecha = Column(DateTime, default=datetime.utcnow)
+
+# Modelo para la tabla del sensor ADS1115 (lectura analógica)
+class ADS1115(Base):
+    __tablename__ = "ads1115"
+    id = Column(Integer, primary_key=True, index=True)
+    analog_value = Column(Float)
+    voltage = Column(Float)
+    fecha = Column(DateTime, default=datetime.utcnow)
+
+# Crear todas las tablas si no existen
+Base.metadata.create_all(bind=engine)
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

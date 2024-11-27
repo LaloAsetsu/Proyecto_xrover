@@ -1,24 +1,11 @@
-from datetime import datetime
-
-from fastapi import FastAPI, Depends
-from pydantic import BaseModel
+from fastapi import FastAPI, Depends, HTTPException
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
-from starlette.middleware.cors import CORSMiddleware
-
-from database import SessionLocal, Ultrasonico, Acelerometro, Presion , Adc
+from database import SessionLocal, Acelerometro, BMP280, Ultrasonico, ADS1115
 
 app = FastAPI()
-origins = {
-    "http://localhost:8000","http://localhost:3000"
-}
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-# Dependencia para la conexión a la base de datos
+
+# Dependencia para obtener la sesión de la base de datos
 def get_db():
     db = SessionLocal()
     try:
@@ -26,69 +13,73 @@ def get_db():
     finally:
         db.close()
 
-# Esquema Pydantic para validar la entrada de datos
+# Endpoints para el acelerómetro
+class AcelerometroDTO(BaseModel):
+    x: float = Field(..., gt=-100.0, lt=100.0)
+    y: float = Field(..., gt=-100.0, lt=100.0)
+    z: float = Field(..., gt=-100.0, lt=100.0)
+    freefall_event: str
+    motion_event: str
+
+@app.post("/accelerometer", response_model=AcelerometroDTO)
+async def create_acelerometro(data: AcelerometroDTO, db: Session = Depends(get_db)):
+    lectura = Acelerometro(**data.dict())
+    db.add(lectura)
+    db.commit()
+    db.refresh(lectura)
+    return lectura
+
+@app.get("/accelerometer", response_model=list[AcelerometroDTO])
+def get_acelerometro(db: Session = Depends(get_db)):
+    return db.query(Acelerometro).all()
+
+# Endpoints para el BMP280 (temperatura, presión, altitud)
+class BMP280DTO(BaseModel):
+    temperature: float
+    pressure: float
+    altitude: float
+
+@app.post("/bmp280", response_model=BMP280DTO)
+async def create_bmp280(data: BMP280DTO, db: Session = Depends(get_db)):
+    lectura = BMP280(**data.dict())
+    db.add(lectura)
+    db.commit()
+    db.refresh(lectura)
+    return lectura
+
+@app.get("/bmp280", response_model=list[BMP280DTO])
+def get_bmp280(db: Session = Depends(get_db)):
+    return db.query(BMP280).all()
+
+# Endpoints para el sensor ultrasónico
 class UltrasonicoDTO(BaseModel):
-    id: int
-    fecha: datetime
-    valor_distancia_cm: float
+    distance_cm: float
 
-    class Config:
-        from_attributes = True
+@app.post("/ultrasonic", response_model=UltrasonicoDTO)
+async def create_ultrasonico(data: UltrasonicoDTO, db: Session = Depends(get_db)):
+    lectura = Ultrasonico(**data.dict())
+    db.add(lectura)
+    db.commit()
+    db.refresh(lectura)
+    return lectura
 
-class AdcDTO(BaseModel):
-    id: int
-    fecha: datetime
-    valor_res_luz: float
+@app.get("/ultrasonic", response_model=list[UltrasonicoDTO])
+def get_ultrasonico(db: Session = Depends(get_db)):
+    return db.query(Ultrasonico).all()
+
+# Endpoints para el sensor ADS1115 (lecturas analógicas)
+class ADS1115DTO(BaseModel):
+    analog_value: int
     voltage: float
 
-    class Config:
-        from_attributes = True
+@app.post("/ads1115", response_model=ADS1115DTO)
+async def create_ads1115(data: ADS1115DTO, db: Session = Depends(get_db)):
+    lectura = ADS1115(**data.dict())
+    db.add(lectura)
+    db.commit()
+    db.refresh(lectura)
+    return lectura
 
-class AcelerometroDTO(BaseModel):
-    id: int
-    fecha: datetime
-    valor_acel_x: float
-    valor_acel_y: float
-    valor_acel_z: float
-
-    class Config:
-        from_attributes = True
-
-class PresionDTO(BaseModel):
-    id: int
-    fecha: datetime
-    valor_temperatura: float
-    valor_presion: float
-    valor_altitud: float
-
-    class Config:
-        from_attributes = True
-
-#class
-
-# Obtener todos los registros
-@app.get("/ultrasonico")
-def get_data(db: Session = Depends(get_db)):
-    data = db.query(Ultrasonico).all()
-    return data
-
-@app.get("/adc")
-def get_data(db: Session = Depends(get_db)):
-    data = db.query(Adc).all()
-    return data
-
-@app.get("/acelerometro")
-def get_data(db: Session = Depends(get_db)):
-    data = db.query(Acelerometro).all()
-    return data
-
-@app.get("/presion")
-def get_data(db: Session = Depends(get_db)):
-    data = db.query(Presion).all()
-    return data
-
-
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+@app.get("/ads1115", response_model=list[ADS1115DTO])
+def get_ads1115(db: Session = Depends(get_db)):
+    return db.query(ADS1115).all()
