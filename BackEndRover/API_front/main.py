@@ -6,9 +6,13 @@ from starlette.middleware.cors import CORSMiddleware
 from database import SessionLocal, Acelerometro, BMP280, Ultrasonico, ADS1115
 
 app = FastAPI()
+
+# Orígenes permitidos para CORS
 origins = {
     "http://localhost:3000", "http://localhost:8000"
 }
+
+# Configuración del middleware de CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -25,7 +29,7 @@ def get_db():
     finally:
         db.close()
 
-# Endpoints para el acelerómetro
+# Modelo de datos para el acelerómetro
 class AcelerometroDTO(BaseModel):
     x: float = Field(..., gt=-100.0, lt=100.0)
     y: float = Field(..., gt=-100.0, lt=100.0)
@@ -33,6 +37,7 @@ class AcelerometroDTO(BaseModel):
     freefall_event: str
     motion_event: str
 
+# Endpoint para crear una nueva lectura del acelerómetro
 @app.post("/accelerometer", response_model=AcelerometroDTO)
 async def create_acelerometro(data: AcelerometroDTO, db: Session = Depends(get_db)):
     lectura = Acelerometro(**data.dict())
@@ -41,16 +46,18 @@ async def create_acelerometro(data: AcelerometroDTO, db: Session = Depends(get_d
     db.refresh(lectura)
     return lectura
 
+# Endpoint para obtener todas las lecturas del acelerómetro
 @app.get("/accelerometer", response_model=list[AcelerometroDTO])
 def get_acelerometro(db: Session = Depends(get_db)):
     return db.query(Acelerometro).all()
 
-# Endpoints para el BMP280 (temperatura, presión, altitud)
+# Modelo de datos para el BMP280 (temperatura, presión, altitud)
 class BMP280DTO(BaseModel):
     temperature: float
     pressure: float
     altitude: float
 
+# Endpoint para crear una nueva lectura del BMP280
 @app.post("/bmp280", response_model=BMP280DTO)
 async def create_bmp280(data: BMP280DTO, db: Session = Depends(get_db)):
     lectura = BMP280(**data.dict())
@@ -59,14 +66,16 @@ async def create_bmp280(data: BMP280DTO, db: Session = Depends(get_db)):
     db.refresh(lectura)
     return lectura
 
+# Endpoint para obtener todas las lecturas del BMP280
 @app.get("/bmp280", response_model=list[BMP280DTO])
 def get_bmp280(db: Session = Depends(get_db)):
     return db.query(BMP280).all()
 
-# Endpoints para el sensor ultrasónico
+# Modelo de datos para el sensor ultrasónico
 class UltrasonicoDTO(BaseModel):
     distance_cm: float
 
+# Endpoint para crear una nueva lectura del sensor ultrasónico
 @app.post("/ultrasonic", response_model=UltrasonicoDTO)
 async def create_ultrasonico(data: UltrasonicoDTO, db: Session = Depends(get_db)):
     lectura = Ultrasonico(**data.dict())
@@ -75,15 +84,17 @@ async def create_ultrasonico(data: UltrasonicoDTO, db: Session = Depends(get_db)
     db.refresh(lectura)
     return lectura
 
+# Endpoint para obtener todas las lecturas del sensor ultrasónico
 @app.get("/ultrasonic", response_model=list[UltrasonicoDTO])
 def get_ultrasonico(db: Session = Depends(get_db)):
     return db.query(Ultrasonico).all()
 
-# Endpoints para el sensor ADS1115 (lecturas analógicas)
+# Modelo de datos para el sensor ADS1115 (lecturas analógicas)
 class ADS1115DTO(BaseModel):
     analog_value: int
     voltage: float
 
+# Endpoint para crear una nueva lectura del sensor ADS1115
 @app.post("/ads1115", response_model=ADS1115DTO)
 async def create_ads1115(data: ADS1115DTO, db: Session = Depends(get_db)):
     lectura = ADS1115(**data.dict())
@@ -92,6 +103,7 @@ async def create_ads1115(data: ADS1115DTO, db: Session = Depends(get_db)):
     db.refresh(lectura)
     return lectura
 
+# Endpoint para obtener todas las lecturas del sensor ADS1115
 @app.get("/ads1115", response_model=list[ADS1115DTO])
 def get_ads1115(db: Session = Depends(get_db)):
     return db.query(ADS1115).all()
