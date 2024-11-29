@@ -1,5 +1,6 @@
 // src/app/page.tsx
-
+//page se encarga de reunir todos los demas componentes, algunos de ellos dentro de otros componentes para construir la pagina completa
+//React y sus variantes estan pensados especificamente para usar este enfoque modular para la ccreacion de apps modernas 
 import Header from "./components/Header";
 import SensorPanel from "./components/SensorPanel";
 import CommandPanel from "./components/CommandPanel";
