@@ -2,11 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* el archivo globals se encarga de los estilos de algunos de los componentes*/
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
 }
-
+/*configuracion de modo oscuro generada automaticamente por tailwinds y nextjs*/
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -14,30 +16,38 @@
   }
 }
 
+/*fondo gris claro a todo el cuerpo */
 body {
   @apply bg-gray-50;
 }
 
+/* estilos para el header, altura de 64px, fondo azul oscuro, centrado */
 .header {
   @apply h-16 bg-blue-800 flex items-center justify-center;
 }
+
 
 .header h1 {
   @apply text-white text-xl font-bold;
 }
 
+/* estilo para el contenido principal de la pagina de un relleno de 24 pixeles y fondo gris claro */
 .main-content {
   @apply p-6 bg-gray-100;
 }
 
+/* contenedor con estilo por defecto con un espacio de 1.5rem entre elementos y fila en pantallas grandes */
 .container {
   @apply flex flex-col gap-6 lg:flex-row;
 }
 
+/* estilo para los paneles de sensores y comandos, para que tomen espacio proporcional */
 .sensor-panel, .command-panel {
   @apply flex-1;
 }
 
+
+/* estilo para los paneles de comando y sensores, con un fondo blanco, relleno de 24 pixeles y sombras medias */
 .sensor-panel .panel, .command-panel .commands {
   @apply bg-white p-6 shadow-md;
 }
@@ -49,19 +59,21 @@ body {
 .sensor-panel p, .command-panel p {
   @apply text-gray-600 mb-2;
 }
-
+/* estilos para el panel de instrucciones dentro del panel de comandos, fondo gris claro */
 .command-panel .instructions {
   @apply bg-gray-200 p-4 mb-4;
 }
-
+/* bordes azul oscuro, relleno de 16 pixeles y un margen en la parte inferior  inferior */
 .command-panel .command-input {
   @apply border-blue-800 p-4 mb-4;
 }
 
+/*estilos para el área de texto dentro del panel de comandos */
 .command-panel textarea {
   @apply w-full p-2 border-gray-300 rounded-md mb-2;
 }
 
+/* estilos para los botones dentro del panel de comandos */
 .command-panel button {
   @apply bg-blue-800 text-white p-2 px-4 rounded-md;
 }
@@ -70,14 +82,16 @@ body {
   @apply grid grid-cols-2 gap-2 mt-4;
 }
 
+/*estilo para los botones que se encuentran dentro de los controles, con fondo gris, texto gris oscuro y bordes redondeados */
 .controls button {
   @apply bg-gray-400 text-gray-800 p-2 rounded-md;
 }
 
+/*estilos especificos para el boton de parado, usa dos columnas, color rojo con texto blanco*/
 .controls .stop-button {
   @apply col-span-2 bg-red-500 text-white p-2 rounded-md;
 }
-
+/*estilo para el pie de pagina, ltura de 48px, fondo gris claro y contenido al centro*/
 footer {
   @apply h-12 bg-gray-100 flex items-center justify-center text-gray-800 text-sm;
 }
