@@ -1,3 +1,5 @@
+//este layout es generado automaticamente por Next.js y no fue modifiado en el desarollo de esta App
+
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
